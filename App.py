@@ -78,27 +78,3 @@ else:
             st.error("Filter harus berupa angka")
     else:
         st.info("Masukkan nilai filter")
-
-if (filter != ""):
-    if (filterSelectBox == ">"):
-        st.table(em.getDataFrame()[em.getDataFrame()[targetFilterColumn] > int(filter)]) 
-    # TODO: lanjutkan code di atas
-    # note: cara filter ada di modul
-    try:
-        filter_value = int(filter)
-        df = em.getDataFrame()
-        
-        if filterSelectBox == ">":
-            st.table(df[df[targetFilterColumn] > filter_value])
-        elif filterSelectBox == "<":
-            st.table(df[df[targetFilterColumn] < filter_value])
-        elif filterSelectBox == "=":
-            st.table(df[df[targetFilterColumn] == filter_value])
-        elif filterSelectBox == "<=":
-            st.table(df[df[targetFilterColumn] <= filter_value])
-        elif filterSelectBox == ">=":
-            st.table(df[df[targetFilterColumn] >= filter_value])
-    except ValueError:
-        st.error("Filter harus berupa angka")
-else:
-    st.info("Masukkan nilai filter")

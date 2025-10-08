@@ -1,40 +1,93 @@
 import pandas
 
-# RULES:
-# 1. JANGAN GANTI NAMA CLASS ATAU FUNGSI YANG ADA
-# 2. JANGAN DELETE FUNGSI YANG ADA
-# 3. JANGAN DELETE ATAU MENAMBAH PARAMETER PADA CONSTRUCTOR ATAU FUNGSI
-# 4. GANTI NAMA PARAMETER DI PERBOLEHKAN
-# 5. LARANGAN DI ATAS BOLEH DILANGGAR JIKA ANDA TAU APA YANG ANDA LAKUKAN (WAJIB BISA JELASKAN)
-# GOODLUCK :)
-
 class excelManager:
     def __init__(self,filePath:str,sheetName:str="Sheet1"):
         self.__filePath = filePath
         self.__sheetName = sheetName
         self.__data = pandas.read_excel(filePath,sheet_name=sheetName)
-            
-    
+
+
     def insertData(self,newData:dict,saveChange:bool=False):
-        # kerjakan disini
-        # clue cara insert row: df = pandas.concat([df, pandas.DataFrame([{"NIM":0,"Nama":"Udin","Nilai":1000}])], ignore_index=True)
+        # Validasi NIM tidak boleh duplikat
+        nim_baru = newData.get("NIM", "").strip()
+        nama_baru = newData.get("Nama", "").strip()
+
+        # Cek NIM sudah ada atau belum
+        if not nim_baru:
+            print("NIM tidak boleh kosong")
+            return
+
+        # Cek Nama harus bukan angka (ada huruf)
+        if any(char.isdigit() for char in nama_baru):
+            print("Nama tidak boleh angka")
+            return
         
-        if (saveChange): self.saveChange()
-        pass
+        # Cek duplikat NIM
+        if nim_baru in self.__data["NIM"].astype(str).values:
+            print("Nim Sudah Ada")
+            return
+        
+        # Insert data baru
+        df_new_row = pandas.DataFrame([newData])
+        self.__data = pandas.concat([self.__data, df_new_row], ignore_index=True)
+
+        if saveChange:
+            self.saveChange()
+        
+        print("Data Sukses di Masukan")
     
     def deleteData(self, targetedNim:str,saveChange:bool=False):
-        # kerjakan disini
-        # clue cara delete row: df.drop(indexBaris, inplace=True); contoh: df.drop(0,inplace=True)
+        targetedNim = targetedNim.strip()
+
+        # Cek apakah NIM ada di data
+        if targetedNim not in self.__data["NIM"].astype(str).values:
+            print("Nim tidak ditemukan")
+            return
         
+        # Dapatkan index baris yang punya nim tersebut
+        idx = self.__data.index[self.__data["NIM"].astype(str) == targetedNim].tolist()
         
-        if (saveChange): self.saveChange()
-        pass
+        # Drop baris tersebut
+        self.__data.drop(idx, inplace=True)
+        self.__data.reset_index(drop=True, inplace=True)
+
+        if saveChange:
+            self.saveChange()
+
+        print("Data Sukses di Hapus")
     
     def editData(self, targetedNim:str, newData:dict,saveChange:bool=False) -> dict:
-        # kerjakan disini
-        # clue cara ganti value: df.at[indexBaris,namaKolom] = value; contoh: df.at[0,ID] = 1
-        if (saveChange): self.saveChange()
-        pass
+        targetedNim = targetedNim.strip()
+        new_nim = newData.get("NIM", "").strip()
+        new_nama = newData.get("Nama", "").strip()
+
+        # Cek apakah NIM yang akan diedit ada
+        if targetedNim not in self.__data["NIM"].astype(str).values:
+            print("Nim tidak ditemukan")
+            return None
+        
+        # Validasi nama baru tidak boleh angka
+        if any(char.isdigit() for char in new_nama):
+            print("Nama tidak boleh angka")
+            return None
+        
+        # Dapatkan index baris yang akan di edit
+        idx = self.__data.index[self.__data["NIM"].astype(str) == targetedNim].tolist()[0]
+
+        # Jika new_nim berbeda dan sudah ada di data lain, tolak edit
+        if new_nim != targetedNim and new_nim in self.__data["NIM"].astype(str).values:
+            print("Nim Sudah Ada")
+            return None
+        
+        # Lakukan edit
+        self.__data.at[idx, "NIM"] = new_nim
+        self.__data.at[idx, "Nama"] = new_nama
+
+        if saveChange:
+            self.saveChange()
+
+        print("Data Sukses di Edit")
+        return self.__data.loc[idx].to_dict()
     
                     
     def getData(self, colName:str, data:str) -> dict:

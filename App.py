@@ -51,14 +51,54 @@ if (choice in ("Insert","Edit")):
 option = ["None",">","<","=","<=",">="]
 filterSelectBox = st.selectbox("Opsi Filter: ",option)
 
-if (filterSelectBox == "None"):
-    st.table(em.getDataFrame()) # tabel biasa
+if filterSelectBox == "None":
+    st.table(em.getDataFrame())  # tabel biasa
 else:
-    targetFilterColumn = st.selectbox("Target Column",["NIM","Nilai"]) # pilihan kolom
-    filter = st.text_input("Filter Nilai") # input angka filter
+    targetFilterColumn = st.selectbox("Target Column", ["NIM", "Nilai"])  # pilihan kolom yang bisa difilter
+    filter_value = st.text_input("Filter Nilai") 
+
+    if filter_value != "":
+        try:
+            filter_num = int(filter_value)
+            df = em.getDataFrame()
+
+            if filterSelectBox == ">":
+                filtered_df = df[df[targetFilterColumn] > filter_num]
+            elif filterSelectBox == "<":
+                filtered_df = df[df[targetFilterColumn] < filter_num]
+            elif filterSelectBox == "=":
+                filtered_df = df[df[targetFilterColumn] == filter_num]
+            elif filterSelectBox == "<=":
+                filtered_df = df[df[targetFilterColumn] <= filter_num]
+            elif filterSelectBox == ">=":
+                filtered_df = df[df[targetFilterColumn] >= filter_num]
+
+            st.table(filtered_df)
+        except ValueError:
+            st.error("Filter harus berupa angka")
+    else:
+        st.info("Masukkan nilai filter")
 
 if (filter != ""):
     if (filterSelectBox == ">"):
-        st.table(em.getDataFrame()[em.getDataFrame()[targetFilterColumn] > int(filter)]) # cara filter
+        st.table(em.getDataFrame()[em.getDataFrame()[targetFilterColumn] > int(filter)]) 
     # TODO: lanjutkan code di atas
     # note: cara filter ada di modul
+    try:
+        filter_value = int(filter)
+        df = em.getDataFrame()
+        
+        if filterSelectBox == ">":
+            st.table(df[df[targetFilterColumn] > filter_value])
+        elif filterSelectBox == "<":
+            st.table(df[df[targetFilterColumn] < filter_value])
+        elif filterSelectBox == "=":
+            st.table(df[df[targetFilterColumn] == filter_value])
+        elif filterSelectBox == "<=":
+            st.table(df[df[targetFilterColumn] <= filter_value])
+        elif filterSelectBox == ">=":
+            st.table(df[df[targetFilterColumn] >= filter_value])
+    except ValueError:
+        st.error("Filter harus berupa angka")
+else:
+    st.info("Masukkan nilai filter")
